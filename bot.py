@@ -12,8 +12,8 @@ def download_posts_from_subreddit(last_timestamp):
 		user_agent="myapp/1.0",
 	)
 
-	# subreddit = reddit.subreddit("greece")
-	subreddit = reddit.subreddit("bottestabtm")
+	subreddit = reddit.subreddit("greece")
+	# subreddit = reddit.subreddit("bottestabtm")
 
 	posts = subreddit.new(limit=3)
 
@@ -80,6 +80,6 @@ if __name__ == "__main__":
 	# Call the main function every minute
 	while True:
 		main()
-		time.sleep(20)		
-		print("Sleeping for 20 seconds")
+		time.sleep(300)		
+		print("Sleeping for 300 seconds")
 
