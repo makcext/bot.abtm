@@ -6,7 +6,8 @@ import requests
 from io import BytesIO
 import pprint
 
-channel_id = "-1001715730728"
+# channel_id = "-1001715730728"
+channel_id = "@ola_kala"
 
 
 
