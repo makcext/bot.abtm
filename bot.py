@@ -21,7 +21,7 @@ def download_posts_from_subreddit(last_timestamp):
 
   subreddit = reddit.subreddit("greece")
   # subreddit = reddit.subreddit("bottestabtm")
-  posts = subreddit.new(limit=1)
+  posts = subreddit.new(limit=2)
 
 
 
@@ -30,7 +30,7 @@ def download_posts_from_subreddit(last_timestamp):
   
 
   for post in posts:
-    # print(post.author, post.title, post.is_self, post.is_video, post.url, post.permalink )
+    print(post.author, post.title, post.is_self, post.is_video, post.url, post.permalink )
     post_timestamp = post.created_utc
     if post_timestamp > last_timestamp:
       downloaded_posts.append(post)
@@ -52,13 +52,65 @@ def load_last_timestamp():
 
   return last_timestamp
 
+#  αστείο/funny
+#  ερωτήσεις/questions
+#  προσωπικά/personal
+#  travel/τουρισμός
+#  πολιτική/politics
+#  κοινωνία/society
+#  πολιτιστικά/culture
+#  οικονομία/economy
+#  επιστήμη/science
+#  αθλητισμός/sports
+#  εκπαίδευση/education
+#  ιστορία/history
+#  τεχνολογία/technology
+#  ψυχαγωγία/entertainment
+#  κουζίνα/food
+
+
+
+
 
 # Define a function to process the downloaded posts
 def process_posts(downloaded_posts):
     for post in downloaded_posts:
+        tag = ""
+
         if post.link_flair_text == ":zz_question: ερωτήσεις/questions" or post.is_self:
             print("Skipping post")
             continue  # Skip this post
+        if post.link_flair_text == ":zz_funny:  αστείο/funny":
+            tag = "#funny"
+        elif post.link_flair_text == ":zz_personal: προσωπικά/personal":
+            tag = "#personal"
+        elif post.link_flair_text == ":zz_travel: travel/τουρισμός":
+            tag = "#travel"
+        elif post.link_flair_text == ":zz_politics: πολιτική/politics":
+            tag = "#politics"
+        elif post.link_flair_text == ":zz_society: κοινωνία/society":
+            tag = "#society"
+        elif post.link_flair_text == ":zz_culture: πολιτιστικά/culture":
+            tag = "#culture"
+        elif post.link_flair_text == ":zz_economy: οικονομία/economy":
+            tag = "#economy"
+        elif post.link_flair_text == ":zz_science: επιστήμη/science":
+            tag = "#science"
+        elif post.link_flair_text == ":zz_sports: αθλητισμός/sports":
+            tag = "#sports"
+        elif post.link_flair_text == ":zz_education: εκπαίδευση/education":
+            tag = "#education"
+        elif post.link_flair_text == ":zz_history: ιστορία/history":
+            tag = "#history"
+        elif post.link_flair_text == ":zz_technology: τεχνολογία/technology":
+            tag = "#technology"
+        elif post.link_flair_text == ":zz_entertainment: ψυχαγωγία/entertainment":
+            tag = "#entertainment"
+        elif post.link_flair_text == ":zz_food: κουζίνα/food":
+            tag = "#food"
+        
+        photoCaption = post.title + " " + tag
+        messageCaption = tag
 
         # Check if the post URL ends with ".jpg"
         if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
@@ -69,7 +121,7 @@ def process_posts(downloaded_posts):
             bot.send_photo(
                 chat_id=channel_id,
                 photo=photo,
-                caption=post.title
+                caption=photoCaption
             )
             continue
 
@@ -77,7 +129,7 @@ def process_posts(downloaded_posts):
             # Send the post title and URL to the Telegram channel
             bot.send_message(
                 chat_id=channel_id,
-                text=f"<a href='{post.url}'>⚡️➛ link</a>",
+                text=f"<a href='{post.url}'>◉  </a>{messageCaption} ",
                 parse_mode="HTML",
                 disable_web_page_preview=False
             )
