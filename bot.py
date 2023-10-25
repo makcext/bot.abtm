@@ -4,13 +4,10 @@ import pickle
 import time
 import requests
 from io import BytesIO
-import pprint
+import random
 
-# channel_id = "-1001715730728"
-channel_id = "@ola_kala"
-
-
-
+channel_id = "-1001715730728"
+# channel_id = "@ola_kala"
 
 def download_posts_from_subreddit(last_timestamp):
   reddit = praw.Reddit(
@@ -22,15 +19,11 @@ def download_posts_from_subreddit(last_timestamp):
   subreddit = reddit.subreddit("greece")
   # subreddit = reddit.subreddit("bottestabtm")
   posts = subreddit.new(limit=2)
-
-
-
   downloaded_posts = []
   new_last_timestamp = last_timestamp
   
 
   for post in posts:
-    print(post.author, post.title, post.is_self, post.is_video, post.url, post.permalink )
     post_timestamp = post.created_utc
     if post_timestamp > last_timestamp:
       downloaded_posts.append(post)
@@ -38,11 +31,12 @@ def download_posts_from_subreddit(last_timestamp):
 
   return downloaded_posts, new_last_timestamp
 
+# Define a function to save the last timestamp to file
 def save_last_timestamp(last_timestamp):
   with open("last_timestamp.txt", "wb") as file:
     pickle.dump(last_timestamp, file)
 
-
+# Define a function to load the last timestamp from file
 def load_last_timestamp():
   try:
     with open("last_timestamp.txt", "rb") as file:
@@ -52,33 +46,13 @@ def load_last_timestamp():
 
   return last_timestamp
 
-#  αστείο/funny
-#  ερωτήσεις/questions
-#  προσωπικά/personal
-#  travel/τουρισμός
-#  πολιτική/politics
-#  κοινωνία/society
-#  πολιτιστικά/culture
-#  οικονομία/economy
-#  επιστήμη/science
-#  αθλητισμός/sports
-#  εκπαίδευση/education
-#  ιστορία/history
-#  τεχνολογία/technology
-#  ψυχαγωγία/entertainment
-#  κουζίνα/food
-
-
-
-
-
 # Define a function to process the downloaded posts
 def process_posts(downloaded_posts):
     for post in downloaded_posts:
         tag = ""
 
         if post.link_flair_text == ":zz_question: ερωτήσεις/questions" or post.is_self:
-            print("Skipping post")
+            print("Skipping post: question or self post")
             continue  # Skip this post
         if post.link_flair_text == ":zz_funny:  αστείο/funny":
             tag = "#funny"
@@ -123,6 +97,7 @@ def process_posts(downloaded_posts):
                 photo=photo,
                 caption=photoCaption
             )
+            print("photo sent")
             continue
 
         if post.url.startswith("https://"):
@@ -133,15 +108,7 @@ def process_posts(downloaded_posts):
                 parse_mode="HTML",
                 disable_web_page_preview=False
             )
-
-
-
-
-
-
-
-
-
+            print("link sent with tag: " + tag)
 
 def main():
   # Load the last timestamp from file
@@ -164,6 +131,7 @@ if __name__ == "__main__":
   # Call the main function every minute
   while True:
     main()
-    time.sleep(150)		
-    print("Sleeping for 150 seconds")
+    delay = random.randint(100, 450)  # generate a random delay between 100 and 450 seconds
+    time.sleep(delay)
+    print(f"Sleeping for {delay} seconds")
 
