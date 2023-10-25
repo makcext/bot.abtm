@@ -1,3 +1,3 @@
 worker: python bot.py
-worker: python chatbot.py
+worker2: python chatbot.py
 
