@@ -8,8 +8,8 @@ import logging
 from io import BytesIO
 
 # Constants
-CHANNEL_ID = "-1001715730728"
-# CHANNEL_ID = "@ola_kala"
+# CHANNEL_ID = "-1001715730728"
+CHANNEL_ID = "@ola_kala"
 CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
 CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
 USER_AGENT = "myapp/1.0"
