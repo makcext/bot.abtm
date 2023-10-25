@@ -3,134 +3,114 @@ import telebot
 import pickle
 import time
 import requests
-from io import BytesIO
 import random
+import logging
+from io import BytesIO
 
-# channel_id = "-1001715730728"
-channel_id = "@ola_kala"
+# Constants
+CHANNEL_ID = "-1001715730728"
+# CHANNEL_ID = "@ola_kala"
+CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
+CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
+USER_AGENT = "myapp/1.0"
+BOT_TOKEN = "6105348307:AAGK-UaRDXrFdZhYSP_t8gY4aYjbDO5SN6s"
+LAST_TIMESTAMP_FILE = "last_timestamp.txt"
+DELAY_MIN = 100
+DELAY_MAX = 450
+
+# Map link flair text to tag
+FLAIR_TO_TAG = {
+    ":zz_funny:  αστείο/funny": "#funny",
+    ":zz_personal: προσωπικά/personal": "#personal",
+    ":zz_travel: travel/τουρισμός": "#travel",
+    ":zz_politics: πολιτική/politics": "#politics",
+    ":zz_society: κοινωνία/society": "#society",
+    ":zz_culture: πολιτιστικά/culture": "#culture",
+    ":zz_economy: οικονομία/economy": "#economy",
+    ":zz_science: επιστήμη/science": "#science",
+    ":zz_sports: αθλητισμός/sports": "#sports",
+    ":zz_education: εκπαίδευση/education": "#education",
+    ":zz_history: ιστορία/history": "#history",
+    ":zz_technology: τεχνολογία/technology": "#technology",
+    ":zz_entertainment: ψυχαγωγία/entertainment": "#entertainment",
+    ":zz_food: κουζίνα/food": "#food"
+}
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def download_posts_from_subreddit(last_timestamp):
-  reddit = praw.Reddit(
-    client_id="YJ85gCYgTVVMtcdsY4jzcw",
-    client_secret="hiPHteFqF5Xb9OUQNBsYfda71L-CxQ",
-    user_agent="myapp/1.0",
-  )
+    reddit = praw.Reddit(
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        user_agent=USER_AGENT,
+    )
 
-  subreddit = reddit.subreddit("greece")
-  # subreddit = reddit.subreddit("bottestabtm")
-  posts = subreddit.new(limit=2)
-  downloaded_posts = []
-  new_last_timestamp = last_timestamp
-  
+    subreddit = reddit.subreddit("greece")
+    posts = subreddit.new(limit=2)
+    downloaded_posts = []
+    new_last_timestamp = last_timestamp
 
-  for post in posts:
-    post_timestamp = post.created_utc
-    if post_timestamp > last_timestamp:
-      downloaded_posts.append(post)
-      new_last_timestamp = max(new_last_timestamp, post_timestamp)
+    for post in posts:
+        post_timestamp = post.created_utc
+        if post_timestamp > last_timestamp:
+            downloaded_posts.append(post)
+            new_last_timestamp = max(new_last_timestamp, post_timestamp)
 
-  return downloaded_posts, new_last_timestamp
+    return downloaded_posts, new_last_timestamp
 
-# Define a function to save the last timestamp to file
 def save_last_timestamp(last_timestamp):
-  with open("last_timestamp.txt", "wb") as file:
-    pickle.dump(last_timestamp, file)
+    with open(LAST_TIMESTAMP_FILE, "wb") as file:
+        pickle.dump(last_timestamp, file)
 
-# Define a function to load the last timestamp from file
 def load_last_timestamp():
-  try:
-    with open("last_timestamp.txt", "rb") as file:
-      last_timestamp = pickle.load(file)
-  except FileNotFoundError:
-    last_timestamp = 0
+    try:
+        with open(LAST_TIMESTAMP_FILE, "rb") as file:
+            last_timestamp = pickle.load(file)
+    except FileNotFoundError:
+        last_timestamp = 0
 
-  return last_timestamp
+    return last_timestamp
 
-# Define a function to process the downloaded posts
-def process_posts(downloaded_posts):
+def process_posts(downloaded_posts, bot):
     for post in downloaded_posts:
-        tag = ""
-
-        if post.link_flair_text == ":zz_question: ερωτήσεις/questions" or post.is_self:
-            print("Skipping post: question or self post")
-            continue  # Skip this post
-        if post.link_flair_text == ":zz_funny:  αστείο/funny":
-            tag = "#funny"
-        elif post.link_flair_text == ":zz_personal: προσωπικά/personal":
-            tag = "#personal"
-        elif post.link_flair_text == ":zz_travel: travel/τουρισμός":
-            tag = "#travel"
-        elif post.link_flair_text == ":zz_politics: πολιτική/politics":
-            tag = "#politics"
-        elif post.link_flair_text == ":zz_society: κοινωνία/society":
-            tag = "#society"
-        elif post.link_flair_text == ":zz_culture: πολιτιστικά/culture":
-            tag = "#culture"
-        elif post.link_flair_text == ":zz_economy: οικονομία/economy":
-            tag = "#economy"
-        elif post.link_flair_text == ":zz_science: επιστήμη/science":
-            tag = "#science"
-        elif post.link_flair_text == ":zz_sports: αθλητισμός/sports":
-            tag = "#sports"
-        elif post.link_flair_text == ":zz_education: εκπαίδευση/education":
-            tag = "#education"
-        elif post.link_flair_text == ":zz_history: ιστορία/history":
-            tag = "#history"
-        elif post.link_flair_text == ":zz_technology: τεχνολογία/technology":
-            tag = "#technology"
-        elif post.link_flair_text == ":zz_entertainment: ψυχαγωγία/entertainment":
-            tag = "#entertainment"
-        elif post.link_flair_text == ":zz_food: κουζίνα/food":
-            tag = "#food"
-        
-        photoCaption = post.title + " " + tag
-        messageCaption = tag
-
-        # Check if the post URL ends with ".jpg"
-        if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
-            # Download the photo from the URL
-            photo = requests.get(post.url).content
-            # Send the photo to the Telegram channel
-            bot.send_photo(
-                chat_id=channel_id,
-                photo=photo,
-                caption=photoCaption
-            )
-            print("photo sent")
+        if post.link_flair_text in [":zz_question: ερωτήσεις/questions", None] or post.is_self:
+            logging.info("Skipping post: question or self post")
             continue
 
-        if post.url.startswith("https://"):
-            # Send the post title and URL to the Telegram channel
-            bot.send_message(
-                chat_id=channel_id,
-                text=f"<a href='{post.url}'>◉  </a>{messageCaption} ",
-                parse_mode="HTML",
-                disable_web_page_preview=False
-            )
-            print("link sent with tag: " + tag)
+        tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
+        photo_caption = f"{post.title} {tag}"
+        message_caption = tag
+
+        try:
+            if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
+                photo = requests.get(post.url).content
+                bot.send_photo(
+                    chat_id=CHANNEL_ID,
+                    photo=photo,
+                    caption=photo_caption
+                )
+                logging.info("photo sent")
+            elif post.url.startswith("https://"):
+                bot.send_message(
+                    chat_id=CHANNEL_ID,
+                    text=f"<a href='{post.url}'>◉  </a>{message_caption} ",
+                    parse_mode="HTML",
+                    disable_web_page_preview=False
+                )
+                logging.info(f"link sent with tag: {tag}")
+        except Exception as e:
+            logging.error(f"Error sending message or photo: {e}")
 
 def main():
-  # Load the last timestamp from file
-  last_timestamp = load_last_timestamp()
-
-  # Download new posts from the subreddit
-  downloaded_posts, new_last_timestamp = download_posts_from_subreddit(last_timestamp)
-
-  # Process the downloaded posts
-  process_posts(downloaded_posts)
-
-  # Save the new last timestamp to file
-  save_last_timestamp(new_last_timestamp)
-
+    last_timestamp = load_last_timestamp()
+    downloaded_posts, new_last_timestamp = download_posts_from_subreddit(last_timestamp)
+    bot = telebot.TeleBot(BOT_TOKEN)
+    process_posts(downloaded_posts, bot)
+    save_last_timestamp(new_last_timestamp)
 
 if __name__ == "__main__":
-  # Initialize the Telegram bot
-  bot = telebot.TeleBot("6105348307:AAGK-UaRDXrFdZhYSP_t8gY4aYjbDO5SN6s")
-
-  # Call the main function every minute
-  while True:
-    main()
-    delay = random.randint(100, 450)  # generate a random delay between 100 and 450 seconds
-    time.sleep(delay)
-    print(f"Sleeping for {delay} seconds")
-
+    while True:
+        main()
+        delay = random.randint(DELAY_MIN, DELAY_MAX)
+        time.sleep(delay)
+        logging.info(f"Sleeping for {delay} seconds")
