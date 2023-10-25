@@ -6,8 +6,8 @@ import requests
 from io import BytesIO
 import random
 
-channel_id = "-1001715730728"
-# channel_id = "@ola_kala"
+# channel_id = "-1001715730728"
+channel_id = "@ola_kala"
 
 def download_posts_from_subreddit(last_timestamp):
   reddit = praw.Reddit(
@@ -90,7 +90,6 @@ def process_posts(downloaded_posts):
         if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
             # Download the photo from the URL
             photo = requests.get(post.url).content
-            print("photo")
             # Send the photo to the Telegram channel
             bot.send_photo(
                 chat_id=channel_id,
