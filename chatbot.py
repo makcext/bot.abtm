@@ -57,12 +57,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 @bot.message_handler(commands=['start'])
 def start(message):
     global time_period_message_id
-    time_period_message = "Ola_Kala -> Κορυφαίες ειδήσεις για"
+    time_period_message = "ola kala bot ->  \nΔιαλέξτε μια περίοδο:"
     reply_markup = telebot.types.InlineKeyboardMarkup(row_width=3)
     reply_markup.add(
         telebot.types.InlineKeyboardButton(text="Σήμερα", callback_data="day"),
         telebot.types.InlineKeyboardButton(text="Εβδομάδα", callback_data="week"),
-        telebot.types.InlineKeyboardButton(text="Μήνα", callback_data="month")
+        # telebot.types.InlineKeyboardButton(text="Μήνα", callback_data="month")
     )
     sent_message = bot.send_message(message.chat.id, time_period_message, reply_markup=reply_markup)
     time_period_message_id = sent_message.message_id
@@ -85,12 +85,13 @@ def callback_handler(call):
     elif call.data == "5" or call.data == "10" or call.data == "15":
         num_posts = int(call.data)
         bot.send_message(chat_id=call.message.chat.id, text=f"Λήψη {num_posts} κορυφαίων αναρτήσεων από το @ola_kala")
+        time.sleep(2)
         if time_period == "day":
             top_posts = reddit.subreddit("Greece").top(time_filter="day", limit=num_posts)
         elif time_period == "week":
             top_posts = reddit.subreddit("Greece").top(time_filter="week", limit=num_posts)
-        elif time_period == "month":
-            top_posts = reddit.subreddit("Greece").top(time_filter="month", limit=num_posts)
+        # elif time_period == "month":
+        #     top_posts = reddit.subreddit("Greece").top(time_filter="month", limit=num_posts)
         for post in top_posts:
             if post.link_flair_text in [":zz_question: ερωτήσεις/questions", None] or post.is_self:
                 logging.info("Skipping post: question or self post")
@@ -117,13 +118,13 @@ def callback_handler(call):
                         disable_web_page_preview=False
                     )
                     logging.info(f"link sent with tag: {tag}")
-                    time.sleep(0.8)
+                    time.sleep(1.5)
             except Exception as e:
                 logging.error(f"Error sending message or photo: {e}")
 
-        restart_markup = telebot.types.InlineKeyboardMarkup()
-        restart_markup.add(telebot.types.InlineKeyboardButton(text="Έξοδος", callback_data="restart"))
-        bot.send_message(chat_id=call.message.chat.id, text="/start", reply_markup=restart_markup)
+        # restart_markup = telebot.types.InlineKeyboardMarkup()
+        # restart_markup.add(telebot.types.InlineKeyboardButton(text="Έξοδος", callback_data="restart"))
+        bot.send_message(chat_id=call.message.chat.id, text="---------- \n/start \n----------" )
     # elif call.data == "restart":
     #     time_period = ""
     #     num_posts = 0
