@@ -7,7 +7,6 @@ import random
 import logging
 from io import BytesIO
 from telebot import types
-from telegram import InputMediaPhoto
 
 # Constants
 # CHANNEL_ID = "-1001715730728"
