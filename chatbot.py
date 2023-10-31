@@ -7,6 +7,7 @@ import random
 import logging
 from io import BytesIO
 from telebot import types
+from telegram import InputMediaPhoto
 
 # Constants
 # CHANNEL_ID = "-1001715730728"
@@ -57,12 +58,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 @bot.message_handler(commands=['start'])
 def start(message):
     global time_period_message_id
-    time_period_message = "ola kala bot ->  \nΔιαλέξτε μια περίοδο:"
-    reply_markup = telebot.types.InlineKeyboardMarkup(row_width=3)
+    time_period_message = "ola kala bot ->  \ndialekse mia poikilia:"
+    reply_markup = telebot.types.InlineKeyboardMarkup(row_width=2)
     reply_markup.add(
-        telebot.types.InlineKeyboardButton(text="Σήμερα", callback_data="day"),
-        telebot.types.InlineKeyboardButton(text="Εβδομάδα", callback_data="week"),
-        # telebot.types.InlineKeyboardButton(text="Μήνα", callback_data="month")
+        telebot.types.InlineKeyboardButton(text="Small", callback_data="15"),
+        telebot.types.InlineKeyboardButton(text="Big", callback_data="20"),
     )
     sent_message = bot.send_message(message.chat.id, time_period_message, reply_markup=reply_markup)
     time_period_message_id = sent_message.message_id
@@ -70,28 +70,13 @@ def start(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    global time_period, num_posts, time_period_message_id
+    global num_posts
     top_posts = []
-    if call.data == "day" or call.data == "week" or call.data == "month":
-        time_period = call.data
-        num_posts_message = "Διαλέξτε μια ποσότητα:"
-        reply_markup = telebot.types.InlineKeyboardMarkup(row_width=3)
-        reply_markup.add(
-            telebot.types.InlineKeyboardButton(text="5", callback_data="5"),
-            telebot.types.InlineKeyboardButton(text="10", callback_data="10"),
-            telebot.types.InlineKeyboardButton(text="15", callback_data="15")
-        )
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=time_period_message_id, text=num_posts_message, reply_markup=reply_markup)
-    elif call.data == "5" or call.data == "10" or call.data == "15":
+    if call.data == "15" or call.data == "20":
         num_posts = int(call.data)
-        bot.send_message(chat_id=call.message.chat.id, text=f"Λήψη {num_posts} κορυφαίων αναρτήσεων από το @ola_kala")
+        bot.send_message(chat_id=call.message.chat.id, text="Λήψη...")
         time.sleep(2)
-        if time_period == "day":
-            top_posts = reddit.subreddit("Greece").top(time_filter="day", limit=num_posts)
-        elif time_period == "week":
-            top_posts = reddit.subreddit("Greece").top(time_filter="week", limit=num_posts)
-        # elif time_period == "month":
-        #     top_posts = reddit.subreddit("Greece").top(time_filter="month", limit=num_posts)
+        top_posts = reddit.subreddit("Greece").top(time_filter="day", limit=num_posts)
         for post in top_posts:
             if post.link_flair_text in [":zz_question: ερωτήσεις/questions", None] or post.is_self:
                 logging.info("Skipping post: question or self post")
@@ -110,6 +95,25 @@ def callback_handler(call):
                         caption=photo_caption
                     )
                     logging.info("photo sent")
+                    time.sleep(1.5)
+
+                elif 'reddit.com/gallery' in post.url:
+                    url_list = []
+                    for _, item_info in post.media_metadata.items():
+                        if 's' in item_info:
+                            image_url = item_info['s']['u']
+                            url_list.append(image_url)
+
+                    if url_list:
+                        bot.send_media_group(chat_id=call.message.chat.id, media=[telebot.types.InputMediaPhoto(media) for media in url_list])
+                        # print("URLs extracted from the gallery:")
+                        # for url in url_list:
+                        #     print(url)
+                    else:
+                        print("No URLs to extract")
+
+                    time.sleep(1.5)
+
                 elif post.url.startswith("https://"):
                     bot.send_message(
                         chat_id=call.message.chat.id,
@@ -118,24 +122,16 @@ def callback_handler(call):
                         disable_web_page_preview=False
                     )
                     logging.info(f"link sent with tag: {tag}")
-                    time.sleep(1.5)
+                    time.sleep(1)
             except Exception as e:
                 logging.error(f"Error sending message or photo: {e}")
 
-        # restart_markup = telebot.types.InlineKeyboardMarkup()
-        # restart_markup.add(telebot.types.InlineKeyboardButton(text="Έξοδος", callback_data="restart"))
         bot.send_message(chat_id=call.message.chat.id, text="---------- \n/start \n----------" )
-    # elif call.data == "restart":
-    #     time_period = ""
-    #     num_posts = 0
-    #     bot.send_message(chat_id=call.message.chat.id, text="Πάτα το /start")
 
-
-bot.polling()
-
-
-
-
-
-
-
+while True:
+    try:
+        bot.polling()
+        break  # If bot.polling() succeeds, break the loop
+    except requests.exceptions.ReadTimeout:
+        print("Timeout occurred, retrying in 5 seconds...")
+        time.sleep(5)
