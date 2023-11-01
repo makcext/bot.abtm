@@ -13,8 +13,9 @@ from telebot import types
 CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
 CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
 USER_AGENT = "myapp/1.0"
-# BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA"
-BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0"
+# BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0" #stage
+BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
+
 LAST_TIMESTAMP_FILE = "last_timestamp.txt"
 DELAY_MIN = 10
 DELAY_MAX = 15
@@ -57,11 +58,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 @bot.message_handler(commands=['start'])
 def start(message):
     global time_period_message_id
-    time_period_message = "ola kala bot ->  \ndialekse mia poikilia:"
+    time_period_message = "Διάλεξε το μέγεθος της λίστας που θες να λάβεις:"
     reply_markup = telebot.types.InlineKeyboardMarkup(row_width=2)
     reply_markup.add(
-        telebot.types.InlineKeyboardButton(text="Small", callback_data="15"),
-        telebot.types.InlineKeyboardButton(text="Big", callback_data="20"),
+        telebot.types.InlineKeyboardButton(text="μικρή", callback_data="8"),
+        telebot.types.InlineKeyboardButton(text="μεγάλη", callback_data="16"),
     )
     sent_message = bot.send_message(message.chat.id, time_period_message, reply_markup=reply_markup)
     time_period_message_id = sent_message.message_id
@@ -71,7 +72,7 @@ def start(message):
 def callback_handler(call):
     global num_posts
     top_posts = []
-    if call.data == "15" or call.data == "20":
+    if call.data == "8" or call.data == "16":
         num_posts = int(call.data)
         bot.send_message(chat_id=call.message.chat.id, text="Λήψη...")
         time.sleep(2)
@@ -105,9 +106,7 @@ def callback_handler(call):
 
                     if url_list:
                         bot.send_media_group(chat_id=call.message.chat.id, media=[telebot.types.InputMediaPhoto(media) for media in url_list])
-                        # print("URLs extracted from the gallery:")
-                        # for url in url_list:
-                        #     print(url)
+
                     else:
                         print("No URLs to extract")
 
