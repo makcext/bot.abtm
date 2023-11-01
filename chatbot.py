@@ -13,8 +13,8 @@ from telebot import types
 CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
 CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
 USER_AGENT = "myapp/1.0"
-# BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0" #stage
-BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
+BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0" #stage
+# BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
 
 LAST_TIMESTAMP_FILE = "last_timestamp.txt"
 DELAY_MIN = 10
