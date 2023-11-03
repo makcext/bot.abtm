@@ -13,18 +13,10 @@ from telebot import types
 CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
 CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
 USER_AGENT = "myapp/1.0"
-BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0" #stage
-# BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
-
-LAST_TIMESTAMP_FILE = "last_timestamp.txt"
-DELAY_MIN = 10
-DELAY_MAX = 15
-
+# BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0" #stage
+BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
 
 bot = telebot.TeleBot(BOT_TOKEN)
-
-
-
 
 reddit = praw.Reddit(
     client_id=CLIENT_ID,
@@ -95,7 +87,7 @@ def callback_handler(call):
                         caption=photo_caption
                     )
                     logging.info("photo sent")
-                    time.sleep(1.5)
+                    time.sleep(1.7)
 
                 elif 'reddit.com/gallery' in post.url:
                     url_list = []
@@ -120,7 +112,7 @@ def callback_handler(call):
                         disable_web_page_preview=False
                     )
                     logging.info(f"link sent with tag: {tag}")
-                    time.sleep(1)
+                    time.sleep(1.6)
             except Exception as e:
                 logging.error(f"Error sending message or photo: {e}")
 
