@@ -1,3 +1,4 @@
+from tokenize import group
 import praw
 import telebot
 import pickle
@@ -39,6 +40,12 @@ FLAIR_TO_TAG = {
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+try:
+    with open("sent_post_ids.pkl", "rb") as file:
+        sent_post_ids = pickle.load(file)
+except FileNotFoundError:
+    sent_post_ids = set()
+
 def download_posts_from_subreddit(last_timestamp):
     reddit = praw.Reddit(
         client_id=CLIENT_ID,
@@ -74,7 +81,12 @@ def load_last_timestamp():
     return last_timestamp
 
 def process_posts(downloaded_posts, bot):
+    global sent_post_ids
     for post in downloaded_posts:
+        if post.title in sent_post_ids:
+            logging.info("Skipping post: already sent")
+            continue
+
         if post.link_flair_text in [":zz_question: ερωτήσεις/questions"] or post.is_self:
             logging.info("Skipping post: question or self post")
             print(post.link_flair_text)
@@ -83,18 +95,25 @@ def process_posts(downloaded_posts, bot):
         tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
         photo_caption = f"{post.title} {tag}"
         message_caption = tag
+        group_photo_caption = f"{post.title} {tag}"
 
         try:
             if post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
+                
                 photo = requests.get(post.url).content
                 bot.send_photo(
                     chat_id=CHANNEL_ID,
                     photo=photo,
                     caption=photo_caption
                 )
+                
                 logging.info("photo sent")
+                sent_post_ids.add(post.title)
+                time.sleep(1.5)
 
             elif 'reddit.com/gallery' in post.url:
+                    
+                   
                     url_list = []
                     for _, item_info in post.media_metadata.items():
                         if 's' in item_info:
@@ -102,24 +121,38 @@ def process_posts(downloaded_posts, bot):
                             url_list.append(image_url)
 
                     if url_list:
-                        bot.send_media_group(chat_id=CHANNEL_ID, media=[telebot.types.InputMediaPhoto(media) for media in url_list])
+                        media_group = [telebot.types.InputMediaPhoto(url_list[0], caption=group_photo_caption)]
+                        media_group.extend([telebot.types.InputMediaPhoto(media) for media in url_list[1:]])
+                        bot.send_media_group(chat_id=CHANNEL_ID, media=media_group)
+                        
                         logging.info("group photo sent")
+                        sent_post_ids.add(post.title)
 
                     else:
-                        print("No URLs to extract")
+                        logging.info("No URLs to extract")
 
                     time.sleep(1.5)
 
             elif post.url.startswith("https://"):
+                
                 bot.send_message(
                     chat_id=CHANNEL_ID,
                     text=f"<a href='{post.url}'>◉  </a>{message_caption} ",
                     parse_mode="HTML",
                     disable_web_page_preview=False
                 )
+                
                 logging.info(f"link sent with tag: {tag}")
+                sent_post_ids.add(post.title)
+                time.sleep(1.5)
+
+            with open("sent_post_ids.pkl", "wb") as file:
+                pickle.dump(sent_post_ids, file)    
+
         except Exception as e:
-            logging.error(f"Error sending message or photo: {e}")
+            logging.error(f"Error sending message or photo or groupPhoto: {e}")
+
+
 
 def main():
     last_timestamp = load_last_timestamp()
