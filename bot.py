@@ -9,8 +9,8 @@ import logging
 from io import BytesIO
 
 # Constants
-CHANNEL_ID = "-1001715730728" #local
-# CHANNEL_ID = "@ola_kala" #prod
+# CHANNEL_ID = "-1001715730728" #local
+CHANNEL_ID = "@ola_kala" #prod
 CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
 CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
 USER_AGENT = "myapp/1.0"
@@ -54,7 +54,7 @@ def download_posts_from_subreddit(last_timestamp):
     )
 
     # subreddit = reddit.subreddit("greece")
-    subreddit = reddit.subreddit("bottestabtm")
+    subreddit = reddit.subreddit("greece")
     posts = subreddit.new(limit=3)
     downloaded_posts = []
     new_last_timestamp = last_timestamp
@@ -165,5 +165,5 @@ if __name__ == "__main__":
     while True:
         main()
         delay = random.randint(DELAY_MIN, DELAY_MAX)
-        time.sleep(delay)
         logging.info(f"Sleeping for {delay} seconds")
+        time.sleep(delay)
