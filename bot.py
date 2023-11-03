@@ -8,12 +8,13 @@ import logging
 from io import BytesIO
 
 # Constants
-# CHANNEL_ID = "-1001715730728"
-CHANNEL_ID = "@ola_kala"
+CHANNEL_ID = "-1001715730728" #local
+# CHANNEL_ID = "@ola_kala" #prod
 CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
 CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
 USER_AGENT = "myapp/1.0"
-BOT_TOKEN = "6105348307:AAGK-UaRDXrFdZhYSP_t8gY4aYjbDO5SN6s"
+BOT_TOKEN = "6105348307:AAGK-UaRDXrFdZhYSP_t8gY4aYjbDO5SN6s" #group bot
+
 LAST_TIMESTAMP_FILE = "last_timestamp.txt"
 DELAY_MIN = 100
 DELAY_MAX = 450
@@ -45,8 +46,9 @@ def download_posts_from_subreddit(last_timestamp):
         user_agent=USER_AGENT,
     )
 
-    subreddit = reddit.subreddit("greece")
-    posts = subreddit.new(limit=2)
+    # subreddit = reddit.subreddit("greece")
+    subreddit = reddit.subreddit("bottestabtm")
+    posts = subreddit.new(limit=3)
     downloaded_posts = []
     new_last_timestamp = last_timestamp
 
@@ -73,8 +75,9 @@ def load_last_timestamp():
 
 def process_posts(downloaded_posts, bot):
     for post in downloaded_posts:
-        if post.link_flair_text in [":zz_question: ερωτήσεις/questions", None] or post.is_self:
+        if post.link_flair_text in [":zz_question: ερωτήσεις/questions"] or post.is_self:
             logging.info("Skipping post: question or self post")
+            print(post.link_flair_text)
             continue
 
         tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
@@ -90,6 +93,23 @@ def process_posts(downloaded_posts, bot):
                     caption=photo_caption
                 )
                 logging.info("photo sent")
+
+            elif 'reddit.com/gallery' in post.url:
+                    url_list = []
+                    for _, item_info in post.media_metadata.items():
+                        if 's' in item_info:
+                            image_url = item_info['s']['u']
+                            url_list.append(image_url)
+
+                    if url_list:
+                        bot.send_media_group(chat_id=CHANNEL_ID, media=[telebot.types.InputMediaPhoto(media) for media in url_list])
+                        logging.info("group photo sent")
+
+                    else:
+                        print("No URLs to extract")
+
+                    time.sleep(1.5)
+
             elif post.url.startswith("https://"):
                 bot.send_message(
                     chat_id=CHANNEL_ID,
