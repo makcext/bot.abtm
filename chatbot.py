@@ -7,16 +7,26 @@ import random
 import logging
 from io import BytesIO
 from telebot import types
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 # Constants
+BOT_TOKEN = os.getenv("CHAT_BOT_TOKEN")
+# print(BOT_TOKEN)
 # CHANNEL_ID = "-1001715730728"
-CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
-CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
-USER_AGENT = "myapp/1.0"
+CLIENT_ID = os.getenv("CHAT_CLIENT_ID")
+# CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
+CLIENT_SECRET = os.getenv("CHAT_CLIENT_SECRET")
+# CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
+USER_AGENT = os.getenv("CHAT_USER_AGENT")
+# USER_AGENT = "myapp/1.0"
 # BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0" #stage
-BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
+# BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
 
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = None
+if BOT_TOKEN is not None:
+    bot = telebot.TeleBot(BOT_TOKEN)
 
 reddit = praw.Reddit(
     client_id=CLIENT_ID,
