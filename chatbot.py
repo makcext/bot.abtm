@@ -13,20 +13,15 @@ import os
 load_dotenv()
 # Constants
 BOT_TOKEN = os.getenv("CHAT_BOT_TOKEN")
-# print(BOT_TOKEN)
-# CHANNEL_ID = "-1001715730728"
-CLIENT_ID = os.getenv("CHAT_CLIENT_ID")
-# CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
-CLIENT_SECRET = os.getenv("CHAT_CLIENT_SECRET")
-# CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
-USER_AGENT = os.getenv("CHAT_USER_AGENT")
-# USER_AGENT = "myapp/1.0"
-# BOT_TOKEN = "6922909929:AAFklaLqTBQKpctjkzpJwCV42fFCXefq-F0" #stage
-# BOT_TOKEN = "6735927791:AAEtA7jjgR7WJXL0ZW1tmt-Dpd42ORzMZxA" #local
+if BOT_TOKEN is None:
+    raise ValueError("Bot token not found. Please set the environment variable CHAT_BOT_TOKEN")
 
-bot = None
-if BOT_TOKEN is not None:
-    bot = telebot.TeleBot(BOT_TOKEN)
+
+CLIENT_ID = os.getenv("CHAT_CLIENT_ID")
+CLIENT_SECRET = os.getenv("CHAT_CLIENT_SECRET")
+USER_AGENT = os.getenv("CHAT_USER_AGENT")
+
+bot = telebot.TeleBot(BOT_TOKEN)
 
 reddit = praw.Reddit(
     client_id=CLIENT_ID,
@@ -80,7 +75,7 @@ def callback_handler(call):
         time.sleep(2)
         top_posts = reddit.subreddit("Greece").top(time_filter="day", limit=num_posts)
         for post in top_posts:
-            if post.link_flair_text in [":zz_question: ερωτήσεις/questions", None] or post.is_self:
+            if post.link_flair_text in [":zz_question: ερωτήσεις/questions"] or post.is_self:
                 logging.info("Skipping post: question or self post")
                 continue
 
@@ -125,7 +120,6 @@ def callback_handler(call):
                     time.sleep(1.6)
             except Exception as e:
                 logging.error(f"Error sending message or photo: {e}")
-
         bot.send_message(chat_id=call.message.chat.id, text="---------- \n/start \n----------" )
 
 while True:
