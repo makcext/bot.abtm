@@ -55,8 +55,8 @@ def download_posts_from_subreddit(last_timestamp):
         user_agent=USER_AGENT,
     )
 
-    subreddit = reddit.subreddit("bottestabtm")
-    # subreddit = reddit.subreddit("greece")
+    # subreddit = reddit.subreddit("bottestabtm")
+    subreddit = reddit.subreddit("greece")
     posts = subreddit.new(limit=3)
     downloaded_posts = []
     new_last_timestamp = last_timestamp
