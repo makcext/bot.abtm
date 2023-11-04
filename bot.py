@@ -7,14 +7,16 @@ import requests
 import random
 import logging
 from io import BytesIO
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 # Constants
-# CHANNEL_ID = "-1001715730728" #local
-CHANNEL_ID = "@ola_kala" #prod
-CLIENT_ID = "YJ85gCYgTVVMtcdsY4jzcw"
-CLIENT_SECRET = "hiPHteFqF5Xb9OUQNBsYfda71L-CxQ"
-USER_AGENT = "myapp/1.0"
-BOT_TOKEN = "6105348307:AAGK-UaRDXrFdZhYSP_t8gY4aYjbDO5SN6s" #group bot
+CHANNEL_ID = os.getenv("CHANNEL_ID")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+USER_AGENT = os.getenv("USER_AGENT")
 
 LAST_TIMESTAMP_FILE = "last_timestamp.txt"
 DELAY_MIN = 100
@@ -53,8 +55,8 @@ def download_posts_from_subreddit(last_timestamp):
         user_agent=USER_AGENT,
     )
 
+    subreddit = reddit.subreddit("bottestabtm")
     # subreddit = reddit.subreddit("greece")
-    subreddit = reddit.subreddit("greece")
     posts = subreddit.new(limit=3)
     downloaded_posts = []
     new_last_timestamp = last_timestamp
@@ -89,7 +91,6 @@ def process_posts(downloaded_posts, bot):
 
         if post.link_flair_text in [":zz_question: ερωτήσεις/questions"] or post.is_self:
             logging.info("Skipping post: question or self post")
-            print(post.link_flair_text)
             continue
 
         tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
@@ -157,8 +158,11 @@ def process_posts(downloaded_posts, bot):
 def main():
     last_timestamp = load_last_timestamp()
     downloaded_posts, new_last_timestamp = download_posts_from_subreddit(last_timestamp)
-    bot = telebot.TeleBot(BOT_TOKEN)
-    process_posts(downloaded_posts, bot)
+    if BOT_TOKEN is not None:
+        bot = telebot.TeleBot(BOT_TOKEN)
+        process_posts(downloaded_posts, bot)
+    else:
+        logging.error("BOT_TOKEN is not set")
     save_last_timestamp(new_last_timestamp)
 
 if __name__ == "__main__":
