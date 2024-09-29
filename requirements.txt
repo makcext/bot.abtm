@@ -1,3 +1,7 @@
 praw
 telebot
 python-dotenv
+requests
+asyncpraw
+asyncio
+beautifulsoup4
