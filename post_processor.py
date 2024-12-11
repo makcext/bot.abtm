@@ -9,10 +9,18 @@ from parsers.parser_protothema import parser_protothema
 
 send_post_ids = load_sent_post_ids()
 
+# Список подстрок, которые должны быть в URL, чтобы пост не пропускался
+required_substrings = ["facebook.com"]
+
+
 async def process_posts(downloaded_posts, bot):
     global send_post_ids
     for post in downloaded_posts:
         
+        if any(substring in post.url for substring in required_substrings):
+            logging.info("Skipping post: URL does not contain required substrings")
+            continue
+
         if post.title in send_post_ids:
             logging.info("Skipping post: already sent")
             continue
@@ -33,7 +41,7 @@ async def process_posts(downloaded_posts, bot):
                 await post_link_processing(post)
 
             send_post_ids.append(post.title)
-            send_post_ids = send_post_ids[-15:]  # Сохраняем только последние 15 идентификаторов
+            send_post_ids = send_post_ids[-105:]  # Сохраняем только последние 15 идентификаторов
             save_sent_post_ids(send_post_ids)
 
             await asyncio.sleep(1.5)

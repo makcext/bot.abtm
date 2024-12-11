@@ -28,7 +28,7 @@ from config import GOOGLE_AI_STUDIO_API
 
 
 
-  # Ожидается, что это будет JSON с 'title' и 'content'
+# Ожидается, что это будет JSON с 'title' и 'content'
 
 
 
@@ -79,8 +79,8 @@ def send_request_to_google(title, content):
     # print("----------------------------------")
     
     # Вывод результата
-    # print("Статус код:", response.status_code)
-    # print("Ответ:", response.json())
+    print("Статус код:", response.status_code)
+    print("Ответ:", response.json())
 
 
     return response
