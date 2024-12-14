@@ -23,6 +23,7 @@ async def download_new_posts(last_timestamp):
             updated_last_timestamp = max(updated_last_timestamp, post_timestamp)
 
     await reddit_client.close()
-    # print(downloaded_posts)
+   
     downloaded_posts.reverse()
+    # print(downloaded_posts)
     return downloaded_posts, updated_last_timestamp
