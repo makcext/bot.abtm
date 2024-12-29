@@ -11,7 +11,7 @@ from parsers.parser_protothema import parser_protothema
 # Инициализируем sent_post_titles как множество
 sent_post_titles = load_sent_post_titles()
 # Список подстрок, которые должны быть в URL, чтобы пост не пропускался
-required_substrings = ["facebook.com", "https://open.spotify.com" ]
+required_substrings = ["facebook.com", "https://open.spotify.com", "www.cinemagazine.gr" ]
 
 async def process_posts(downloaded_posts, bot):
     global sent_post_titles  # Используем множество вместо списка
@@ -64,7 +64,8 @@ async def process_post_content(post, bot, caption):
     elif post.url.endswith((".jpg", ".jpeg", ".png", ".gif")):
         await process_single_image(post, caption)
     elif post.url.startswith("https://"):
-        await post_link_processing(post)
+        # await post_link_processing(post)
+        await process_link(post)
 
 
 async def process_gallery(post, bot, caption):
@@ -89,20 +90,21 @@ async def process_single_image(post, caption):
 
 
 
-async def post_link_processing(post):
-    print(post.url)
-    if post.url.startswith("https://naftemporiki.gr/") or post.url.startswith("https://www.naftemporiki.gr/"):
-        pass
-    elif post.url.startswith("https://protothema.gr") or post.url.startswith("https://www.protothema.gr"):
-        tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
-        parser_protothema(post.url, tag)
-        return
-    elif post.url.startswith("https://thepressproject.gr/") or post.url.startswith("https://www.thepressproject.gr/"):
-        tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
-        parser_thepressproject(post.url, tag)
-        return
-    else:
-        await process_link(post)
+# async def post_link_processing(post):
+#     print(post.url)
+#     if post.url.startswith("https://naftemporiki.gr/") or post.url.startswith("https://www.naftemporiki.gr/"):
+#         pass
+#     # elif post.url.startswith("https://protothema.gr") or post.url.startswith("https://www.protothema.gr"):
+#         # tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
+#         # parser_protothema(post.url, tag)
+#         # return
+#     elif post.url.startswith("https://thepressproject.gr/") or post.url.startswith("https://www.thepressproject.gr/"):
+#         # tag = FLAIR_TO_TAG.get(post.link_flair_text, "")
+#         # parser_thepressproject(post.url, tag)
+#         # return
+#         pass
+#     else:
+#         await process_link(post)
 
 
 async def process_link(post):
